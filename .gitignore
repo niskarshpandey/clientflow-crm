@@ -5,3 +5,12 @@ coverage/
 .env.*
 !.env.example
 *.log
+
+# Ignore Prisma generated AI skills
+server/.agents/
+server/.claude/
+server/.windsurf/
+server/skills-lock.json
+
+# Ignore generated Prisma Client
+server/src/generated/
