@@ -1,4 +1,4 @@
-﻿import { Pencil, Trash2, Users } from 'lucide-react'
+import { Pencil, Trash2, Users, UserCheck } from 'lucide-react'
 
 import type { Lead } from '../../types/lead'
 
@@ -11,6 +11,7 @@ interface Props {
   leads: Lead[]
   onEdit: (lead: Lead) => void
   onDelete: (lead: Lead) => void
+  onConvert: (lead: Lead) => void
 }
 
 const currency = new Intl.NumberFormat('en-IN', {
@@ -22,7 +23,8 @@ const currency = new Intl.NumberFormat('en-IN', {
 export default function LeadTable({
   leads,
   onEdit,
-  onDelete
+  onDelete,
+  onConvert
 }: Props) {
   if (leads.length === 0) {
     return (
@@ -91,6 +93,18 @@ export default function LeadTable({
 
               <td className="px-5 py-4">
                 <div className="flex items-center gap-2">
+                  {lead.status === 'WON' && (
+                    <button
+                      type="button"
+                      title="Convert to Client"
+                      aria-label={`Convert ${lead.name} to client`}
+                      onClick={() => onConvert(lead)}
+                      className="flex items-center gap-1 whitespace-nowrap rounded-lg bg-emerald-50 px-2.5 py-2 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                    >
+                      <UserCheck size={16} />
+                      Convert
+                    </button>
+                  )}
                   <button
                     type="button"
                     title="Edit lead"

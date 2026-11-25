@@ -1,3 +1,4 @@
+import Clients from './pages/clients/Clients'
 import Leads from './pages/leads/Leads'
 import {
   BrowserRouter,
@@ -50,7 +51,7 @@ function App() {
 
               <Route
                 path="clients"
-                element={<PlaceholderPage title="Clients" />}
+                element={<Clients />}
               />
 
               <Route

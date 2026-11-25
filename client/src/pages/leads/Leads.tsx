@@ -5,6 +5,8 @@ import {
 } from 'lucide-react'
 
 import { leadsApi } from '../../api/leads'
+import { clientsApi } from '../../api/clients'
+import ConvertLeadDialog from '../../components/leads/ConvertLeadDialog'
 import { ApiError } from '../../api/client'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -52,6 +54,10 @@ export default function Leads() {
   const [deleteTarget, setDeleteTarget] = useState<Lead | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+
+  const [convertTarget, setConvertTarget] = useState<Lead | null>(null)
+  const [converting, setConverting] = useState(false)
+  const [convertError, setConvertError] = useState('')
 
   useEffect(() => {
     if (!token) return
@@ -184,6 +190,48 @@ export default function Leads() {
       )
     } finally {
       setDeleting(false)
+    }
+  }
+
+  function openConversion(lead: Lead) {
+    if (lead.status !== 'WON') return
+
+    setConvertError('')
+    setConvertTarget(lead)
+  }
+
+  async function confirmConversion() {
+    if (!token || !convertTarget || converting) return
+
+    setConverting(true)
+    setConvertError('')
+
+    try {
+      await clientsApi.convertLead(token, convertTarget.id)
+
+      setConvertTarget(null)
+      setSuccess('Lead converted to client successfully')
+      refresh()
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          logout()
+          return
+        }
+
+        if (err.status === 409) {
+          setConvertError(err.message)
+          return
+        }
+      }
+
+      setConvertError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to convert lead'
+      )
+    } finally {
+      setConverting(false)
     }
   }
 
@@ -351,6 +399,7 @@ export default function Leads() {
             leads={leads}
             onEdit={openEdit}
             onDelete={openDelete}
+            onConvert={openConversion}
           />
 
           <footer className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4">
@@ -419,6 +468,16 @@ export default function Leads() {
           lead={editingLead}
           onClose={closeForm}
           onSave={saveLead}
+        />
+      )}
+
+      {convertTarget && (
+        <ConvertLeadDialog
+          lead={convertTarget}
+          converting={converting}
+          error={convertError}
+          onCancel={() => setConvertTarget(null)}
+          onConfirm={confirmConversion}
         />
       )}
 
