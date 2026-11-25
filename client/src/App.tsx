@@ -1,4 +1,5 @@
-﻿import {
+import Leads from './pages/leads/Leads'
+import {
   BrowserRouter,
   Routes,
   Route,
@@ -44,7 +45,7 @@ function App() {
 
               <Route
                 path="leads"
-                element={<PlaceholderPage title="Leads" />}
+                element={<Leads />}
               />
 
               <Route

@@ -17,21 +17,58 @@ export const leadPrioritySchema = z.enum([
   'URGENT'
 ])
 
+const nameSchema = z.string()
+  .trim()
+  .min(2, 'Name must contain at least 2 characters')
+  .max(100)
+  .regex(
+    /^(?=.*\p{L})[\p{L}\p{M} .'-]+$/u,
+    'Enter a valid full name'
+  )
+
+const phoneSchema = z.string()
+  .trim()
+  .max(30)
+  .regex(
+    /^\+?[0-9 ()-]+$/,
+    'Phone number contains invalid characters'
+  )
+  .refine(
+    value => {
+      const digits = value.replace(/\D/g, '')
+      return digits.length >= 7 && digits.length <= 15
+    },
+    'Phone number must contain 7 to 15 digits'
+  )
+
 export const createLeadSchema = z.object({
-  name: z.string().trim().min(2).max(100),
+  name: nameSchema,
 
-  email: z.string().trim().email().max(254)
+  email: z.string()
+    .trim()
+    .email('Enter a valid email address')
+    .max(254)
     .transform(value => value.toLowerCase())
-    .nullable().optional(),
+    .nullable()
+    .optional(),
 
-  phone: z.string().trim().min(5).max(30)
-    .nullable().optional(),
+  phone: phoneSchema
+    .nullable()
+    .optional(),
 
-  company: z.string().trim().max(150)
-    .nullable().optional(),
+  company: z.string()
+    .trim()
+    .max(150)
+    .regex(/\p{L}/u, 'Enter a valid company name')
+    .nullable()
+    .optional(),
 
-  source: z.string().trim().max(100)
-    .nullable().optional(),
+  source: z.string()
+    .trim()
+    .max(100)
+    .regex(/\p{L}/u, 'Enter a valid lead source')
+    .nullable()
+    .optional(),
 
   status: leadStatusSchema.optional(),
 
@@ -43,15 +80,19 @@ export const createLeadSchema = z.object({
     .multipleOf(0.01)
     .optional(),
 
-  notes: z.string().trim().max(5000)
-    .nullable().optional()
+  notes: z.string()
+    .trim()
+    .max(5000)
+    .nullable()
+    .optional()
 }).strict()
 
 export const updateLeadSchema = createLeadSchema
   .partial()
-  .refine(data => Object.keys(data).length > 0, {
-    message: 'At least one field must be provided'
-  })
+  .refine(
+    data => Object.keys(data).length > 0,
+    { message: 'At least one field must be provided' }
+  )
 
 export const leadIdSchema = z.string().uuid()
 
