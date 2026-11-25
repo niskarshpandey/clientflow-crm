@@ -1,39 +1,77 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+﻿import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate
+} from 'react-router-dom'
 
-import DashboardLayout from "./components/layout/DashboardLayout";
-import Dashboard from "./pages/Dashboard";
+import DashboardLayout from './components/layout/DashboardLayout'
+import Dashboard from './pages/Dashboard'
+import Login from './pages/auth/Login'
+import Register from './pages/auth/Register'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+import { AuthProvider } from './context/AuthProvider'
 
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-8">
-      <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-      <p className="mt-2 text-slate-500">This module is coming soon.</p>
+      <h1 className="text-2xl font-bold text-slate-900">
+        {title}
+      </h1>
+      <p className="mt-2 text-slate-500">
+        This module is coming soon.
+      </p>
     </div>
-  );
+  )
 }
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="leads" element={<PlaceholderPage title="Leads" />} />
-          <Route path="clients" element={<PlaceholderPage title="Clients" />} />
-          <Route
-            path="projects"
-            element={<PlaceholderPage title="Projects" />}
-          />
-          <Route
-            path="settings"
-            element={<PlaceholderPage title="Settings" />}
-          />
-        </Route>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route element={<DashboardLayout />}>
+              <Route
+                index
+                element={<Navigate to="/dashboard" replace />}
+              />
+
+              <Route path="dashboard" element={<Dashboard />} />
+
+              <Route
+                path="leads"
+                element={<PlaceholderPage title="Leads" />}
+              />
+
+              <Route
+                path="clients"
+                element={<PlaceholderPage title="Clients" />}
+              />
+
+              <Route
+                path="projects"
+                element={<PlaceholderPage title="Projects" />}
+              />
+
+              <Route
+                path="settings"
+                element={<PlaceholderPage title="Settings" />}
+              />
+            </Route>
+          </Route>
+
+          <Route
+            path="*"
+            element={<Navigate to="/dashboard" replace />}
+          />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App
