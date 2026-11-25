@@ -1,9 +1,10 @@
-﻿import express from 'express'
+import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import { rateLimit } from 'express-rate-limit'
 import healthRouter from './routes/health.routes'
 import authRouter from './modules/auth/auth.routes'
+import leadRouter from './modules/leads/lead.routes'
 
 const app = express()
 
@@ -47,6 +48,7 @@ app.use('/api/auth/register', authLimiter)
 
 app.use('/api/health', healthRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/leads', leadRouter)
 
 app.use((_req, res) => {
   res.status(404).json({
