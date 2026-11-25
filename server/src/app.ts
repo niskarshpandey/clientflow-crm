@@ -1,3 +1,4 @@
+import clientRouter from './modules/clients/client.routes'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -49,6 +50,7 @@ app.use('/api/auth/register', authLimiter)
 app.use('/api/health', healthRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/leads', leadRouter)
+app.use('/api/clients', clientRouter)
 
 app.use((_req, res) => {
   res.status(404).json({
