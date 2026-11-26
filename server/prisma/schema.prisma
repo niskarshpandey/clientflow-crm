@@ -8,6 +8,7 @@ datasource db {
 }
 
 model User {
+  tasks     Task[]
   projects  Project[]
   clients   Client[]
   leads     Lead[]
@@ -112,6 +113,7 @@ enum ProjectPriority {
 }
 
 model Project {
+  tasks       Task[]
   id          String          @id @default(uuid())
   name        String
   description String?
@@ -132,10 +134,57 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([id, ownerId])
   @@index([ownerId])
   @@index([ownerId, status])
   @@index([ownerId, priority])
   @@index([ownerId, createdAt])
   @@index([clientId, ownerId])
   @@index([ownerId, dueDate])
+}
+
+enum TaskStatus {
+  TO_DO
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus   @default(TO_DO)
+  priority    TaskPriority @default(MEDIUM)
+
+  startDate   DateTime?
+  dueDate     DateTime?
+  completedAt DateTime?
+
+  estimatedHours Decimal? @db.Decimal(8, 2)
+  actualHours    Decimal? @db.Decimal(8, 2)
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  projectId String
+  project   Project @relation(fields: [projectId, ownerId], references: [id, ownerId], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([ownerId, status])
+  @@index([ownerId, priority])
+  @@index([ownerId, dueDate])
+  @@index([ownerId, createdAt])
+  @@index([projectId, ownerId])
 }
