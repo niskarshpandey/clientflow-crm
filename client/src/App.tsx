@@ -1,3 +1,4 @@
+import Projects from './pages/projects/Projects'
 import Clients from './pages/clients/Clients'
 import Leads from './pages/leads/Leads'
 import {
@@ -56,7 +57,7 @@ function App() {
 
               <Route
                 path="projects"
-                element={<PlaceholderPage title="Projects" />}
+                element={<Projects />}
               />
 
               <Route
