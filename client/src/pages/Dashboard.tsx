@@ -1,231 +1,190 @@
+﻿import { useEffect, useState } from 'react'
+
 import {
-  Users,
-  ContactRound,
-  IndianRupee,
-  TrendingUp,
-  ArrowUpRight,
-  Clock3,
-} from "lucide-react";
+  RefreshCw,
+  Loader2,
+  AlertCircle
+} from 'lucide-react'
 
-const stats = [
-  {
-    title: "Total Clients",
-    value: "128",
-    change: "+12.5%",
-    icon: Users,
-    color: "bg-blue-50 text-blue-600",
-  },
-  {
-    title: "Active Leads",
-    value: "42",
-    change: "+8.2%",
-    icon: ContactRound,
-    color: "bg-purple-50 text-purple-600",
-  },
-  {
-    title: "Total Revenue",
-    value: "₹4,85,000",
-    change: "+18.4%",
-    icon: IndianRupee,
-    color: "bg-emerald-50 text-emerald-600",
-  },
-  {
-    title: "Conversion Rate",
-    value: "24.8%",
-    change: "+3.1%",
-    icon: TrendingUp,
-    color: "bg-orange-50 text-orange-600",
-  },
-];
+import { useAuth } from '../hooks/useAuth'
 
-const leads = [
-  {
-    name: "Rahul Sharma",
-    company: "TechNova",
-    status: "Qualified",
-    value: "₹45,000",
-  },
-  {
-    name: "Priya Verma",
-    company: "PixelCraft",
-    status: "New",
-    value: "₹28,000",
-  },
-  {
-    name: "Aman Gupta",
-    company: "GrowthLabs",
-    status: "Proposal",
-    value: "₹75,000",
-  },
-];
+import { ApiError } from '../api/client'
+
+import { dashboardApi } from '../api/dashboard'
+
+import DashboardKpis from '../components/dashboard/DashboardKpis'
+
+import DashboardCharts from '../components/dashboard/DashboardCharts'
+
+import DashboardRecent from '../components/dashboard/DashboardRecent'
+
+import DashboardDeadlines from '../components/dashboard/DashboardDeadlines'
+
+import type {
+  DashboardOverview
+} from '../types/dashboard'
 
 export default function Dashboard() {
+  const { token, logout } = useAuth()
+
+  const [data, setData] =
+    useState<DashboardOverview | null>(null)
+
+  const [loading, setLoading] = useState(true)
+
+  const [error, setError] = useState('')
+
+  const [revision, setRevision] = useState(0)
+
+  useEffect(() => {
+    if (!token) return
+
+    let active = true
+
+    const timer = window.setTimeout(async () => {
+      if (!active) return
+
+      setLoading(true)
+      setError('')
+
+      try {
+        const response = await dashboardApi.getOverview(token)
+
+        if (!active) return
+
+        setData(response.data)
+      } catch (err) {
+        if (!active) return
+
+        if (err instanceof ApiError && err.status === 401) {
+          logout()
+          return
+        }
+
+        setData(null)
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Unable to load dashboard'
+        )
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }, 0)
+
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [token, revision, logout])
+
+  function refreshDashboard() {
+    setLoading(true)
+    setError('')
+    setRevision(previous => previous + 1)
+  }
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Here's what's happening with your business.
-        </p>
+
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Dashboard
+          </h1>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Monitor your business performance and operations.
+          </p>
+
+          {data && !loading && (
+            <p className="mt-2 text-xs text-slate-400">
+              Last updated: {
+                new Date(data.generatedAt).toLocaleString('en-IN')
+              }
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={refreshDashboard}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <RefreshCw
+            size={16}
+            className={loading ? 'animate-spin' : ''}
+          />
+
+          {loading ? 'Refreshing...' : 'Refresh Dashboard'}
+        </button>
       </div>
 
-      {/* KPI cards */}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
+      {loading && (
+        <div
+          role="status"
+          className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-8"
+        >
+          <Loader2
+            size={32}
+            className="animate-spin text-indigo-600"
+          />
 
-          return (
-            <div
-              key={stat.title}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-500">
-                  {stat.title}
-                </span>
+          <p className="mt-4 text-sm text-slate-500">
+            Loading business analytics...
+          </p>
+        </div>
+      )}
 
-                <div className={`rounded-xl p-2 ${stat.color}`}>
-                  <Icon size={20} />
-                </div>
-              </div>
+      {!loading && error && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-200 bg-red-50 p-6"
+        >
+          <div className="flex items-center gap-3 text-red-700">
+            <AlertCircle size={22} />
 
-              <div className="mt-5">
-                <p className="text-3xl font-bold text-slate-900">
-                  {stat.value}
-                </p>
-
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="flex items-center text-xs font-semibold text-emerald-600">
-                    <ArrowUpRight size={14} />
-                    {stat.change}
-                  </span>
-                  <span className="text-xs text-slate-400">vs last month</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Pipeline and activity */}
-      <div className="grid gap-6 xl:grid-cols-3">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Sales Pipeline
-            </h2>
-            <span className="text-xs text-slate-400">Demo data</span>
-          </div>
-
-          <div className="space-y-5">
-            {[
-              {
-                stage: "New Leads",
-                count: 18,
-                width: "75%",
-                color: "bg-blue-500",
-              },
-              {
-                stage: "Qualified",
-                count: 12,
-                width: "55%",
-                color: "bg-purple-500",
-              },
-              {
-                stage: "Proposal",
-                count: 8,
-                width: "35%",
-                color: "bg-amber-500",
-              },
-              { stage: "Won", count: 4, width: "20%", color: "bg-emerald-500" },
-            ].map((item) => (
-              <div key={item.stage}>
-                <div className="mb-2 flex justify-between text-sm">
-                  <span className="font-medium text-slate-700">
-                    {item.stage}
-                  </span>
-                  <span className="text-slate-500">{item.count} deals</span>
-                </div>
-
-                <div className="h-2.5 rounded-full bg-slate-100">
-                  <div
-                    className={`h-full rounded-full ${item.color}`}
-                    style={{ width: item.width }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center gap-2">
-            <Clock3 size={20} className="text-indigo-600" />
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent Activity
+            <h2 className="font-semibold">
+              Unable to load dashboard
             </h2>
           </div>
 
-          <div className="space-y-6">
-            {[
-              "New lead added to pipeline",
-              "Proposal sent to client",
-              "Project marked as active",
-              "Deal moved to qualified",
-            ].map((activity, index) => (
-              <div key={activity} className="flex gap-3">
-                <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-indigo-500" />
-                <div>
-                  <p className="text-sm font-medium text-slate-700">
-                    {activity}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {index + 1} hours ago · Demo
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+          <p className="mt-3 text-sm text-red-600">
+            {error}
+          </p>
 
-      {/* Recent leads */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 p-6">
-          <h2 className="text-lg font-semibold text-slate-900">Recent Leads</h2>
+          <button
+            type="button"
+            onClick={refreshDashboard}
+            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Try Again
+          </button>
         </div>
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-6 py-4 font-medium">Name</th>
-                <th className="px-6 py-4 font-medium">Company</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.map((lead) => (
-                <tr key={lead.name} className="border-t border-slate-100">
-                  <td className="px-6 py-4 font-semibold text-slate-800">
-                    {lead.name}
-                  </td>
-                  <td className="px-6 py-4 text-slate-600">{lead.company}</td>
-                  <td className="px-6 py-4">
-                    <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-                      {lead.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-slate-700">
-                    {lead.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {!loading && !error && data && (
+        <>
+          <DashboardKpis kpis={data.kpis} />
+
+          <DashboardCharts
+            distributions={data.distributions}
+          />
+
+          <DashboardDeadlines
+            upcoming={data.upcoming}
+          />
+
+          <DashboardRecent
+            recent={data.recent}
+          />
+        </>
+      )}
+
     </div>
-  );
+  )
 }

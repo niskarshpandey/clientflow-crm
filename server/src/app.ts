@@ -1,3 +1,4 @@
+import dashboardRouter from './modules/dashboard/dashboard.routes'
 import taskRouter from './modules/tasks/task.routes'
 import projectRouter from './modules/projects/project.routes'
 import clientRouter from './modules/clients/client.routes'
@@ -55,6 +56,9 @@ app.use('/api/leads', leadRouter)
 app.use('/api/clients', clientRouter)
 app.use('/api/projects', projectRouter)
 app.use('/api/tasks', taskRouter)
+
+
+app.use('/api/dashboard', dashboardRouter);
 
 app.use((_req, res) => {
   res.status(404).json({

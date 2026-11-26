@@ -14,3 +14,6 @@ server/skills-lock.json
 
 # Ignore generated Prisma Client
 server/src/generated/
+test-results/
+playwright-report/
+playwright/.cache/
