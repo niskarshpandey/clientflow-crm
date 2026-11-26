@@ -1,3 +1,4 @@
+import projectRouter from './modules/projects/project.routes'
 import clientRouter from './modules/clients/client.routes'
 import express from 'express'
 import cors from 'cors'
@@ -51,6 +52,7 @@ app.use('/api/health', healthRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/leads', leadRouter)
 app.use('/api/clients', clientRouter)
+app.use('/api/projects', projectRouter)
 
 app.use((_req, res) => {
   res.status(404).json({

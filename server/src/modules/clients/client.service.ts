@@ -1,4 +1,4 @@
-﻿import { prisma } from '../../config/prisma'
+import { prisma } from '../../config/prisma'
 
 import type { Prisma } from '../../generated/prisma/client'
 
@@ -123,12 +123,31 @@ export async function deleteClient(
   ownerId: string,
   id: string
 ) {
-  const result = await prisma.client.deleteMany({
-    where: { id, ownerId }
-  })
+  try {
+    const result = await prisma.client.deleteMany({
+      where: {
+        id,
+        ownerId
+      }
+    })
 
-  if (result.count === 0) {
-    throw new ClientError(404, 'Client not found')
+    if (result.count === 0) {
+      throw new ClientError(404, 'Client not found')
+    }
+  } catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'P2003'
+    ) {
+      throw new ClientError(
+        409,
+        'Cannot delete client with linked projects'
+      )
+    }
+
+    throw error
   }
 }
 
