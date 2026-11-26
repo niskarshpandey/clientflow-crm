@@ -1,4 +1,5 @@
-﻿import {
+import ProjectTaskProgress from '../tasks/ProjectTaskProgress'
+import {
   X,
   Pencil,
   FolderKanban
@@ -115,14 +116,7 @@ export default function ProjectDetails({
             </div>
           </div>
 
-          <div className="rounded-xl border border-dashed border-slate-300 p-5">
-            <h3 className="font-semibold text-slate-800">
-              Project Tasks
-            </h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Task management will be available in an upcoming module.
-            </p>
-          </div>
+          <ProjectTaskProgress projectId={project.id} />
 
           <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
             <button

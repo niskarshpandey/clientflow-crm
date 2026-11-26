@@ -3,6 +3,7 @@ import {
   Users,
   ContactRound,
   FolderKanban,
+  ClipboardList,
   Settings,
   Workflow,
 } from "lucide-react";
@@ -13,6 +14,7 @@ const navigation = [
   { name: "Leads", path: "/leads", icon: ContactRound },
   { name: "Clients", path: "/clients", icon: Users },
   { name: "Projects", path: "/projects", icon: FolderKanban },
+  { name: "Tasks", path: "/tasks", icon: ClipboardList },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
 

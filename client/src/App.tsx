@@ -1,3 +1,4 @@
+import Tasks from './pages/tasks/Tasks'
 import Projects from './pages/projects/Projects'
 import Clients from './pages/clients/Clients'
 import Leads from './pages/leads/Leads'
@@ -58,6 +59,10 @@ function App() {
               <Route
                 path="projects"
                 element={<Projects />}
+              />
+              <Route
+                path="tasks"
+                element={<Tasks />}
               />
 
               <Route
