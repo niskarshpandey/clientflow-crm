@@ -240,6 +240,7 @@ export default function Leads() {
     setStatus('')
     setPriority('')
     setPage(1)
+    setLimit(10)
     setLoading(true)
     setError('')
     setRevision(value => value + 1)

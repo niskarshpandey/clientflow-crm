@@ -1,5 +1,7 @@
-﻿import { Outlet, useNavigate } from 'react-router-dom'
-import { Bell, Search, LogOut } from 'lucide-react'
+import Notifications from './Notifications'
+import GlobalSearch from './GlobalSearch'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
 import Sidebar from './Sidebar'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -37,15 +39,9 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
-            <Search
-              size={20}
-              className="hidden cursor-pointer text-slate-500 md:block"
-            />
+            <GlobalSearch />
 
-            <Bell
-              size={20}
-              className="hidden cursor-pointer text-slate-500 md:block"
-            />
+            <Notifications />
 
             <div className="hidden h-8 w-px bg-slate-200 sm:block" />
 

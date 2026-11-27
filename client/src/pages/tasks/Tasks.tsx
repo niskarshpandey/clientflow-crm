@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react'
+import SearchableSelect from '../../components/common/SearchableSelect'
+import { useEffect, useState } from 'react'
 import {
   Plus,
   Search,
@@ -436,36 +437,25 @@ export default function Tasks() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <input
-            aria-label="Search projects"
-            className={inputClass}
-            value={projectSearch}
-            maxLength={100}
-            onChange={event => setProjectSearch(event.target.value)}
-            placeholder="Search projects..."
-          />
-
-          <select
-            aria-label="Filter by project"
-            className={inputClass}
+          <SearchableSelect
             value={filters.projectId}
-            onChange={event => selectProject(event.target.value)}
-          >
-            <option value="">All Projects</option>
-
-            {selectedProject &&
-              !projects.some(item => item.id === selectedProject.id) && (
-                <option value={selectedProject.id}>
-                  {selectedProject.name}
-                </option>
-              )}
-
-            {projects.map(project => (
-              <option key={project.id} value={project.id}>
-                {project.name} - {project.client.name}
-              </option>
-            ))}
-          </select>
+            search={projectSearch}
+            onSearchChange={setProjectSearch}
+            onChange={selectProject}
+            placeholder="All Projects"
+            searchPlaceholder="Search projects..."
+            error={projectError}
+            options={[
+              ...projects,
+              ...(selectedProject &&
+                !projects.some(item => item.id === selectedProject.id)
+                ? [selectedProject]
+                : [])
+            ].map(project => ({
+              value: project.id,
+              label: `${project.name} - ${project.client.name}`
+            }))}
+          />
         </div>
 
         {projectError && (
