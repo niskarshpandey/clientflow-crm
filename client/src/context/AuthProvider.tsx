@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { AuthContext } from './AuthContext'
 import { authApi } from '../api/auth'
@@ -75,6 +75,14 @@ export function AuthProvider({
     await authApi.register(credentials)
   }
 
+  function updateUser(updatedUser: User) {
+    setUser(current =>
+      current && current.id === updatedUser.id
+        ? { ...current, ...updatedUser }
+        : current
+    )
+  }
+
   function logout() {
     sessionStorage.removeItem(TOKEN_KEY)
     setToken(null)
@@ -90,6 +98,7 @@ export function AuthProvider({
         isLoading,
         login,
         register,
+        updateUser,
         logout
       }}
     >

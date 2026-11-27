@@ -1,4 +1,4 @@
-﻿import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../../config/prisma'
 
@@ -8,7 +8,7 @@ export class AuthError extends Error {
   }
 }
 
-function generateToken(userId: string) {
+function generateToken(userId: string, tokenVersion: number) {
   const secret = process.env.JWT_SECRET
 
   if (!secret || secret.length < 32) {
@@ -16,7 +16,7 @@ function generateToken(userId: string) {
   }
 
   return jwt.sign(
-    { sub: userId },
+    { sub: userId, tokenVersion },
     secret,
     {
       algorithm: 'HS256',
@@ -76,7 +76,7 @@ export async function loginUser(data: {
   }
 
   return {
-    token: generateToken(user.id),
+    token: generateToken(user.id, user.tokenVersion),
     user: {
       id: user.id,
       name: user.name,

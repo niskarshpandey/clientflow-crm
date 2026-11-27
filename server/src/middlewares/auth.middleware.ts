@@ -1,7 +1,8 @@
 ﻿import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
+import { prisma } from '../config/prisma'
 
-export function authenticate(
+export async function authenticate(
   req: Request,
   res: Response,
   next: NextFunction
@@ -27,27 +28,68 @@ export function authenticate(
     return
   }
 
+  let decoded: jwt.JwtPayload
+
   try {
-    const decoded = jwt.verify(token, secret, {
+    const payload = jwt.verify(token, secret, {
       algorithms: ['HS256'],
       issuer: 'clientflow',
       audience: 'clientflow-api'
     })
 
     if (
-      typeof decoded === 'string' ||
-      typeof decoded.sub !== 'string' ||
-      typeof decoded.exp !== 'number'
+      typeof payload === 'string' ||
+      typeof payload.sub !== 'string' ||
+      !payload.sub ||
+      typeof payload.exp !== 'number' ||
+      typeof payload.tokenVersion !== 'number' ||
+      !Number.isSafeInteger(payload.tokenVersion) ||
+      payload.tokenVersion < 0
     ) {
       throw new Error('Invalid token')
     }
 
-    res.locals.userId = decoded.sub
-    next()
+    decoded = payload
   } catch {
     res.status(401).json({
       success: false,
-      message: 'Invalid or expired token'
+      message: 'Invalid or expired token. Please sign in again.'
+    })
+    return
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.sub
+      },
+      select: {
+        id: true,
+        tokenVersion: true
+      }
+    })
+
+    if (
+      !user ||
+      user.tokenVersion !== decoded.tokenVersion
+    ) {
+      res.status(401).json({
+        success: false,
+        message: 'Session expired. Please sign in again.'
+      })
+      return
+    }
+
+    res.locals.userId = user.id
+    res.locals.tokenVersion = user.tokenVersion
+
+    next()
+  } catch {
+    console.error('Authentication database check failed')
+
+    res.status(500).json({
+      success: false,
+      message: 'Unable to verify authentication'
     })
   }
 }

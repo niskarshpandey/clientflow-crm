@@ -8,17 +8,19 @@ datasource db {
 }
 
 model User {
-  tasks     Task[]
-  projects  Project[]
-  clients   Client[]
-  leads     Lead[]
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  password  String
-  role      String    @default("USER")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  tokenVersion    Int              @default(0)
+  businessProfile BusinessProfile?
+  tasks           Task[]
+  projects        Project[]
+  clients         Client[]
+  leads           Lead[]
+  id              String           @id @default(uuid())
+  name            String
+  email           String           @unique
+  password        String
+  role            String           @default("USER")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 enum LeadStatus {
@@ -187,4 +189,20 @@ model Task {
   @@index([ownerId, dueDate])
   @@index([ownerId, createdAt])
   @@index([projectId, ownerId])
+}
+
+model BusinessProfile {
+  id            String  @id @default(uuid())
+  companyName   String?
+  businessEmail String?
+  phone         String?
+  website       String?
+  industry      String?
+  address       String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
